@@ -38,7 +38,6 @@ public class ExTranslatorV1Test {
         service.create("myId");//같은 ID 저장 시도
     }
 
-
     @Slf4j
     @RequiredArgsConstructor
     static class Service {
