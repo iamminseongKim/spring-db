@@ -73,4 +73,78 @@ class MemberServiceTest {
         assertTrue(memberRepository.find(username).isPresent());
         assertTrue(logRepository.find(username).isPresent());
     }
+
+
+    /**
+     * MemberService    @Transactional:ON
+     * MemberRepository @Transactional:ON
+     * LogRepository    @Transactional:ON
+     */
+    @Test
+    void outerTxOn_success() {
+        //given
+        String username = "outerTxOn_success";
+
+        //when
+        memberService.joinV1(username);
+
+        //then: 모든 데이터가 정상 저장된다.
+        assertTrue(memberRepository.find(username).isPresent());
+        assertTrue(logRepository.find(username).isPresent());
+    }
+
+    /**
+     * memberService    @Transactional : ON
+     * memberRepository @Transactional : ON
+     * LogRepository    @Transactional : ON EXCEPTION
+     */
+    @Test
+    void outerTxOn_fail() {
+        //given
+        String username = "로그예외_outerTxOn_fail";
+
+        //when
+        assertThatThrownBy(() -> memberService.joinV1(username))
+                .isInstanceOf(RuntimeException.class);
+        //then : 모든 데이터가 롤벡된다.
+        assertTrue(memberRepository.find(username).isEmpty());
+        assertTrue(logRepository.find(username).isEmpty());
+    }
+
+    /**
+     * memberService    @Transactional : ON
+     * memberRepository @Transactional : ON
+     * LogRepository    @Transactional : ON EXCEPTION
+     */
+    @Test
+    void recoverException_fail() {
+        //given
+        String username = "로그예외_recoverException_fail";
+
+        //when
+        assertThatThrownBy(() -> memberService.joinV2(username))
+                .isInstanceOf(RuntimeException.class);
+        //then : 모든 데이터가 롤벡된다.
+        assertTrue(memberRepository.find(username).isEmpty());
+        assertTrue(logRepository.find(username).isEmpty());
+    }
+
+    /**
+     * memberService    @Transactional : ON
+     * memberRepository @Transactional : ON
+     * LogRepository    @Transactional : ON (REQUIRES_NEW) EXCEPTION
+     */
+    @Test
+    void recoverException_success() {
+        //given
+        String username = "로그예외_recoverException_success";
+
+        //when
+        memberService.joinV2(username);
+
+        //then : 로그는 없고, 멤버는 있는 상황이 되야 한다.
+        assertTrue(memberRepository.find(username).isPresent());
+        assertTrue(logRepository.find(username).isEmpty());
+    }
+
 }
